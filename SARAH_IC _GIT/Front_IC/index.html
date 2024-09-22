@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Análises</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;700&display=swap">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="imagens/lupa.png" alt="Logo lupa" class="logo">
+            <h1>
+                <span class="title-main">Acompanhamento</span>
+                <span class="title-sub">das análises</span>
+            </h1>
+        </div>
+    </header>
+    <div class="dropdown-container">
+        <label for="pretratamento">Selecionar pré-tratamento:</label>
+        <select id="pretratamento" name="pretratamento">
+            <option value="nenhum">Nenhum</option>
+            <option value="snv">SNV</option>
+            <option value="msc">MSC</option>
+            <option value="savitzky-golay">Savitzky-Golay</option>
+        </select>
+        
+        <label for="metodo-estatistico">Método Estatístico:</label>
+        <select id="metodo-estatistico" name="metodo-estatistico">
+            <option value="nenhum">Nenhum</option>
+            <option value="pca">Principal Component Analysis (PCA)</option>
+            <option value="pcr">Principal Component Regression (PCR)</option>
+            <option value="plsr">Partial Least Square Regression (PLSR)</option>
+        </select>
+
+        <label for="parametros">Parâmetros:</label>
+        <select id="parametros" name="parametros">
+            <option value="sst">SST(ºbrix)</option>
+            <option value="firmeza">Firmeza</option>
+            <option value="aac">AAC</option>
+            <option value="att">ATT</option>
+            <option value="massa-seca">Massa seca</option>
+        </select>
+    </div>
+    <main>
+        <section class="charts">
+            <div class="chart-container">
+                <img id="chart" src="" alt="Gráfico" style="display:none;">
+            </div>
+        </section>
+    </main>
+    <script>
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', fetchChart);
+        });
+
+        function fetchChart() {
+            const pretratamento = document.getElementById('pretratamento').value;
+            const metodoEstatistico = document.getElementById('metodo-estatistico').value;
+
+            fetch('/get-chart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pretratamento, metodo_estatistico: metodoEstatistico })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const img = document.getElementById('chart');
+                img.src = url;
+                img.style.display = 'block'; // Exibe a imagem do gráfico
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+    </script>
+</body>
+</html>
