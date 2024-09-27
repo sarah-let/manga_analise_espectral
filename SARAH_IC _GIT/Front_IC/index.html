@@ -32,17 +32,27 @@
             <option value="pca">Principal Component Analysis (PCA)</option>
             <option value="pcr">Principal Component Regression (PCR)</option>
             <option value="plsr">Partial Least Square Regression (PLSR)</option>
+            <option value="svmw">Support Vector Machine (SVM)</option>
+        </select>
+
+        <label for="variedades">Variedades:</label>
+        <select id="variedades" name="variedades">
+            <option value="tommy">Tommy</option>
+            <option value="palmer">Palmer</option>
+            <option value="kent">Kent</option>
+            <option value="keitt">Keitt</option>
         </select>
 
         <label for="parametros">Parâmetros:</label>
         <select id="parametros" name="parametros">
-            <option value="sst">SST(ºbrix)</option>
+            <option value="acido ascorbico">Ácido ascórbico</option>
+            <option value="acidez titulavel">Acidez titulável</option>
             <option value="firmeza">Firmeza</option>
-            <option value="aac">AAC</option>
-            <option value="att">ATT</option>
-            <option value="massa-seca">Massa seca</option>
+            <option value="brix">Brix</option>
+            <option value="massa seca">Massa seca</option>
         </select>
     </div>
+
     <main>
         <section class="charts">
             <div class="chart-container">
@@ -50,28 +60,51 @@
             </div>
         </section>
     </main>
+
     <script>
+        // Adiciona o evento de mudança nos selects
         document.querySelectorAll('select').forEach(select => {
             select.addEventListener('change', fetchChart);
         });
 
+        // Função para buscar o gráfico
         function fetchChart() {
+            // Capturar os valores selecionados
             const pretratamento = document.getElementById('pretratamento').value;
             const metodoEstatistico = document.getElementById('metodo-estatistico').value;
+            const variedade = document.getElementById('variedades').value;
+            const parametro = document.getElementById('parametros').value;
 
-            fetch('/get-chart', {
+            // Montar o objeto JSON a ser enviado
+            const data = {
+                pretratamento: pretratamento,
+                metodo_estatistico: metodoEstatistico,
+                parametro: parametro,
+                variedade: variedade
+            };
+
+            console.log(JSON.stringify(data));
+
+            // Enviar a requisição para o backend
+            fetch('http://127.0.0.1:5000', {  // Altere a URL caso esteja usando outra porta
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ pretratamento, metodo_estatistico: metodoEstatistico })
+                body: JSON.stringify(data)  // Envia o JSON com as seleções
             })
-            .then(response => response.blob())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na requisição: ' + response.statusText);
+                }
+                return response.blob();
+            })
             .then(blob => {
+                // Exibir o gráfico retornado
                 const url = URL.createObjectURL(blob);
                 const img = document.getElementById('chart');
                 img.src = url;
-                img.style.display = 'block'; // Exibe a imagem do gráfico
+                img.style.display = 'block';  // Exibe a imagem do gráfico
             })
             .catch(error => console.error('Erro:', error));
         }
